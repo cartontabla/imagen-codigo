@@ -1,0 +1,13 @@
+size(400, 400);
+background(200);
+stroke(0);
+noFill();
+strokeWeight(3);
+beginShape();
+vertex(60, 300);
+vertex(120, 100);
+vertex(180, 300);
+vertex(240, 100);
+vertex(300, 300);
+endShape();
+save("zigzag.png");

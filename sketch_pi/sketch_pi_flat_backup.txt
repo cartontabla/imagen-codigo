@@ -1,0 +1,187 @@
+import java.math.BigInteger;
+
+int speed = 2; // Velocidad del scroll
+
+ArrayList<Float> positions = new ArrayList<Float>();
+ArrayList<String> tokens = new ArrayList<String>(); // "0".."9" o "."
+
+int text_size = 200;
+
+// Distancia libre entre cuadrados.
+// Si frameGap = 0, los cuadrados se tocan pero no se solapan.
+int frameGap = 0;
+
+// Distancia entre centros de tokens consecutivos
+int frameSpacing;
+
+PiDigitGenerator gen;
+boolean pointAdded = false; // controla cuándo insertar el "."
+
+// Colores tipo código de resistencias, índice = dígito
+color[] digitColors = {
+  color(0, 0, 0),       // 0 negro
+  color(101, 67, 33),   // 1 marrón
+  color(255, 0, 0),     // 2 rojo
+  color(255, 140, 0),   // 3 naranja
+  color(255, 255, 0),   // 4 amarillo
+  color(0, 255, 0),     // 5 verde
+  color(0, 0, 255),     // 6 azul
+  color(148, 0, 211),   // 7 violeta
+  color(128, 128, 128), // 8 gris
+  color(255, 255, 255)  // 9 blanco
+};
+
+PFont font;
+PFont infoFont;
+
+long decimalIndex = 0;
+long lastShownDecimalIndex = -1;
+
+void setup() {
+  size(800, 200);
+
+  // Evita consumo extra de memoria en pantallas Retina / HiDPI.
+  pixelDensity(1);
+
+  background(0);
+
+  font = createFont("Arial Black", text_size);
+  infoFont = createFont("Arial", 18);
+
+  // Configuración tipográfica inicial
+  textFont(font);
+  textSize(text_size);
+  textAlign(CENTER, CENTER);
+
+  frameRate(60); // Subido a 60 FPS para mayor fluidez de scroll
+  rectMode(CENTER);
+
+  frameSpacing = text_size + frameGap;
+
+  gen = new PiDigitGenerator();
+
+  // Primer dígito real de pi: 3
+  tokens.add(str(gen.next()));
+  positions.add((float) width);
+
+  surface.setTitle("Pi decimal index: 0");
+  // Mantenemos la tipografía base activa antes de entrar al bucle
+  textFont(font);
+  textSize(text_size);
+  textAlign(CENTER, CENTER);
+
+}
+
+void draw() {
+  background(0);
+
+  // Agregar nuevos tokens solo cuando el último centro esté
+  // al menos frameSpacing píxeles a la izquierda del nuevo centro.
+  if (positions.isEmpty() || positions.get(positions.size() - 1) <= width - frameSpacing) {
+    if (!pointAdded) {
+      tokens.add(".");
+      positions.add((float) width);
+      pointAdded = true;
+    } else {
+      // Obtenemos el resultado numérico del generador
+      int nextVal = gen.next();
+      String valStr = str(nextVal);
+      
+      // Separamos en caracteres individuales por si el algoritmo devuelve más de un dígito de golpe
+      for (int i = 0; i < valStr.length(); i++) {
+        char c = valStr.charAt(i);
+        tokens.add(String.valueOf(c));
+        
+        // Si es el primer dígito extraído tras el bloque, se posiciona en "width".
+        // Los siguientes dígitos múltiples se desfasan hacia la derecha secuencialmente 
+        // para que no se encabalguen en el mismo píxel.
+        if (i == 0) {
+          positions.add((float) width);
+        } else {
+          float lastPos = positions.get(positions.size() - 1);
+          positions.add(lastPos + frameSpacing);
+        }
+        decimalIndex++;
+      }
+    }
+  }
+
+  // Dibujar los tokens desplazándose
+  for (int j = 0; j < tokens.size(); j++) {
+    String t = tokens.get(j);
+    float px = positions.get(j);
+
+    if (t.equals(".")) {
+      // Punto decimal: sin cuadrado de fondo.
+      fill(255);
+      text(".", px, height / 2 - text_size / 3);
+    } else {
+      int d = int(t);
+      
+      // Validamos por seguridad absoluta que esté entre 0 y 9
+      if (d >= 0 && d <= 9) {
+        color bg = digitColors[d];
+        color fg = contrastColor(bg);
+
+        fill(bg);
+        noStroke();
+
+        // El cuadrado mide text_size de ancho.
+        rect(px, height / 2, text_size, height);
+
+        fill(fg);
+        text(t, px, height / 2);
+      }
+    }
+
+    // Mover la posición hacia la izquierda
+    positions.set(j, px - speed);
+  }
+
+  // Eliminar tokens que salen por completo de la pantalla.
+  while (!positions.isEmpty() && positions.get(0) < -text_size / 2) {
+    positions.remove(0);
+    tokens.remove(0);
+  }
+
+  // Actualizar título de ventana solo cuando cambia el índice.
+  if (decimalIndex != lastShownDecimalIndex) {
+    surface.setTitle("Pi decimal index: " + decimalIndex);
+    lastShownDecimalIndex = decimalIndex;
+  }
+
+  // Mostrar el índice dentro del sketch (descomenta si lo deseas usar).
+  // drawInfo();
+}
+
+
+void drawInfo() {
+  pushStyle();
+
+  rectMode(CORNER);
+  noStroke();
+
+  // Fondo semitransparente para que el índice se lea sobre cualquier color.
+  fill(0, 180);
+  rect(10, 10, 240, 34, 6);
+
+  fill(255);
+  textFont(infoFont);
+  textSize(18);
+  textAlign(LEFT, CENTER);
+
+  text("decimal index: " + decimalIndex, 20, 27);
+
+  popStyle();
+}
+
+// Color de contraste por luminancia
+color contrastColor(color c) {
+  float luminance = 0.299 * red(c) + 0.587 * green(c) + 0.114 * blue(c);
+
+  if (luminance > 140) {
+    return color(0);     // texto negro sobre fondos claros
+  } else {
+    return color(255);   // texto blanco sobre fondos oscuros
+  }
+}

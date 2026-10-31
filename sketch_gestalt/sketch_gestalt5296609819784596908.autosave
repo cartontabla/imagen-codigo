@@ -1,0 +1,119 @@
+// sketch_gestalt
+// Genera los principios de la Gestalt como imágenes simples de 400x400.
+// Cada principio se dibuja y se guarda en su propio archivo PNG.
+
+void setup() {
+  size(400, 400);
+  noLoop();
+
+  proximidad();    save("proximidad.png");
+  semejanza();     save("semejanza.png");
+  cierre();        save("cierre.png");
+  continuidad();   save("continuidad.png");
+  figuraFondo();   save("figura_fondo.png");
+  sincronia();     save("sincronia.png");
+  simetria();      save("simetria.png");
+  conectividad();  save("conectividad.png");
+  praegnanz();     save("praegnanz.png");
+
+  exit();
+}
+
+// 1. Proximidad: lo cercano se agrupa (dos grupos de puntos).
+void proximidad() {
+  background(255);
+  fill(0);
+  noStroke();
+  for (int g = 0; g < 2; g++) {
+    float cx = 135 + g * 130;   // centro de cada grupo
+    for (int y = 0; y < 5; y++)
+      for (int x = 0; x < 5; x++)
+        ellipse(cx + (x - 2) * 22, 200 + (y - 2) * 22, 9, 9);
+  }
+}
+
+// 2. Semejanza: lo parecido se agrupa (columnas por color).
+void semejanza() {
+  background(255);
+  noStroke();
+  for (int y = 0; y < 6; y++)
+    for (int x = 0; x < 6; x++) {
+      fill((x % 2 == 0) ? 0 : 190);
+      ellipse(105 + x * 38, 105 + y * 38, 15, 15);
+    }
+}
+
+// 3. Cierre: lo incompleto se completa (círculo con un hueco).
+void cierre() {
+  background(255);
+  noFill();
+  stroke(0);
+  strokeWeight(7);
+  arc(200, 200, 200, 200, radians(25), radians(335));
+}
+
+// 4. Continuidad: el ojo sigue el camino más suave.
+void continuidad() {
+  background(255);
+  noFill();
+  stroke(0);
+  strokeWeight(6);
+  beginShape();
+  for (int x = 0; x <= 400; x += 8)
+    vertex(x, 200 + 55 * sin(x * 0.028));
+  endShape();
+}
+
+// 5. Figura y fondo: la figura se separa del fondo.
+void figuraFondo() {
+  background(255);
+  fill(0);
+  noStroke();
+  ellipse(200, 200, 190, 190);
+}
+
+// 6. Sincronía: lo que se mueve junto se agrupa (flechas en la misma dirección).
+void sincronia() {
+  background(255);
+  fill(0);
+  noStroke();
+  for (int y = 0; y < 3; y++)
+    for (int x = 0; x < 4; x++) {
+      float px = 115 + x * 60, py = 140 + y * 60;
+      triangle(px, py - 14, px, py + 14, px + 26, py);
+    }
+}
+
+// 7. Simetría: lo simétrico se agrupa.
+void simetria() {
+  background(255);
+  noStroke();
+  fill(0);
+  triangle(70, 200, 140, 130, 140, 270);    // izquierda
+  ellipse(105, 200, 28, 28);
+  triangle(330, 200, 260, 130, 260, 270);   // derecha (espejo)
+  ellipse(295, 200, 28, 28);
+  stroke(210);
+  strokeWeight(2);
+  //line(200, 60, 200, 340);                  // eje
+}
+
+// 8. Conectividad: lo conectado se agrupa.
+void conectividad() {
+  background(255);
+  stroke(0);
+  strokeWeight(3);
+  line(55, 140, 345, 140);                  // línea que conecta
+  noStroke();
+  fill(0);
+  for (int x = 0; x < 5; x++) ellipse(55 + x * 72, 140, 15, 15);   // conectados
+  for (int x = 0; x < 4; x++) ellipse(100 + x * 67, 270, 15, 15);  // sueltos
+}
+
+// 9. Prägnanz: la forma más simple y regular (la buena forma).
+void praegnanz() {
+  background(255);
+  fill(0);
+  noStroke();
+  ellipse(200, 200, 200, 200);
+}

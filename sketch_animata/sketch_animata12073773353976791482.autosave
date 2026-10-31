@@ -1,0 +1,33 @@
+// sketch_animata: carga una marioneta de animata (.nmt + .png) y la anima con su
+// esqueleto (piel y huesos). La clase Animata (Animata.pde) encapsula la carga y
+// la animación; el sketch principal solo crea el objeto y lo actualiza/dibuja.
+//
+// Teclas:  [espacio]  alterna guion automático / manual (arrastrar)
+//          [s]        graba una salva de 24 frames en la carpeta "frames/"
+
+Animata animata;
+
+void setup() {
+  size(800, 500, P2D);
+  pixelDensity(1);
+  animata = new Animata("doubblebass");
+}
+
+void draw() {
+  background(20);
+  if (animata.grabando) {
+    animata.pasoSalva();     // captura un frame por ciclo de draw()
+  } else {
+    animata.actualizar(mousePressed, mouseX, mouseY, millis());
+    animata.deformar();
+    animata.dibujar();
+  }
+}
+
+void keyPressed() {
+  if (key == 's' || key == 'S') {
+    animata.iniciarSalva(24);
+  } else {
+    animata.automatico = !animata.automatico;
+  }
+}

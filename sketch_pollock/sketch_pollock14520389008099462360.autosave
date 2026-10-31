@@ -1,0 +1,70 @@
+// sketch_pollock
+// Goteo y trazo, ambos irregulares: el azar solicitado de Jackson Pollock.
+// El trazo es un arco tendido a la horizontal; el goteo, una vertical que cae.
+
+color[] paleta = {#141414, #F2EEE2, #A8A8A0, #C02828, #2848A0, #C8A028, #2E7A46, #C87028};
+color   fondo  = #D8D0BC;    // el lienzo crudo, sin imprimar
+
+void setup() {
+  size(700, 900);
+  pixelDensity(1);
+  randomSeed(7);             // el azar fijado: el "controlo el flujo" de Pollock
+  noLoop();
+}
+
+void draw() {
+  background(fondo);
+  noFill();
+
+  for (int i = 0; i < 280; i++) {
+    trazo(paleta[int(random(paleta.length))]);
+  }
+  for (int i = 0; i < 520; i++) {
+    goteo(paleta[int(random(paleta.length))]);
+  }
+  save("pollock.png");
+}
+
+// el trazo: un arco tendido a la horizontal, con latigazo ocasional
+void trazo(color c) {
+  stroke(c, 160);
+  strokeWeight(random(1, 3));
+  float x = random(width);
+  float y = random(height);
+  float a = (random(1) < 0.5 ? 0 : PI) + random(-0.6, 0.6);   // a ras, horizontal
+  float v = random(5, 11);             // paso
+  int   n = int(random(140, 320));     // longitud: barre el lienzo
+  float giro = random(-1.8, 1.8);      // arco suave, no bucle cerrado
+  float dg = giro / n;                 // giro por paso
+  beginShape();
+  for (int k = 0; k < n; k++) {
+    vertex(x, y);
+    a += dg + random(-0.02, 0.02);     // la curva + la irregularidad
+    if (random(1) < 0.01) a += random(-1.5, 1.5);   // el latigazo
+    x += cos(a) * v;
+    y += sin(a) * v;
+    if (x < 0 || x > width || y < 0 || y > height) break;
+  }
+  endShape();
+}
+
+// el goteo: una vertical fina que serpentea al caer y termina en gota
+void goteo(color c) {
+  stroke(c, 150);
+  strokeWeight(1);
+  float x = random(width);
+  float y = random(height);      // empieza en la mitad superior
+  beginShape();
+  for (int k = 0; k < 60; k++) {
+    vertex(x, y);
+    x += random(-1.0, 1.0);            // serpentea
+    y += random(2, 6);                 // cae
+    if (y > height) break;
+  }
+  endShape();
+  if (random(1) < 0.7) {               // la gota que se detiene
+    fill(c, 150);
+    noStroke();
+    ellipse(x, y, random(3, 7), random(4, 20));
+  }
+}

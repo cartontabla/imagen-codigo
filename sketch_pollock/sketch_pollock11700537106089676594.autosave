@@ -1,0 +1,68 @@
+// sketch_pollock
+// Goteo y trazo, ambos irregulares: el azar solicitado de Jackson Pollock.
+
+color[] paleta = {#181818, #E8E4DA, #A9A9A0, #8A4A3A, #3A4A5A};
+color   fondo  = #DED6C4;    // el lienzo crudo, sin imprimar
+
+void setup() {
+  size(700, 900);
+  pixelDensity(1);
+  randomSeed(7);             // el azar fijado: el "controlo el flujo" de Pollock
+  noLoop();
+}
+
+void draw() {
+  background(fondo);
+  noFill();
+
+  // los trazos: el gesto que barre, con inercia y latigazos
+  for (int i = 0; i < 500; i++) {
+    trazo(paleta[int(random(paleta.length))]);
+  }
+  // los goteos: la pintura que cae
+  for (int i = 0; i < 1000; i++) {
+    goteo(paleta[int(random(paleta.length))]);
+  }
+  save("pollock.png");
+}
+
+// el trazo: una línea que avanza con inercia y de vez en cuando da un latigazo
+void trazo(color c) {
+  stroke(c, 150);
+  strokeWeight(random(1, 4));
+  float x = random(width);
+  float y = random(height);
+  float a = random(TWO_PI);          // dirección inicial
+  float v = random(5, 16);           // tamaño del paso
+  beginShape();
+  for (int k = 0; k < 90; k++) {
+    vertex(x, y);
+    a += random(-0.35, 0.35);        // la deriva suave: el arco
+    if (random(1) < 0.04) a += random(-1.6, 1.6);   // el latigazo
+    x += cos(a) * v;
+    y += sin(a) * v;
+    if (x < 0 || x > width || y < 0 || y > height) break;
+  }
+  endShape();
+}
+
+// el goteo: una vertical que serpentea al caer y termina en gota
+void goteo(color c) {
+  stroke(c, 150);
+  strokeWeight(random(1, 3));
+  float x = random(width);
+  float y = random(height * 0.4);    // empieza en la mitad superior
+  beginShape();
+  for (int k = 0; k < 50; k++) {
+    vertex(x, y);
+    x += random(-1.2, 1.2);          // serpentea
+    y += random(2, 7);               // cae
+    if (y > height) break;
+  }
+  endShape();
+  if (random(1) < 0.6) {             // la gota que se detiene
+    fill(c, 150);
+    noStroke();
+    ellipse(x, y, random(3, 9), random(4, 12));
+  }
+}

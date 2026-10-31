@@ -1,0 +1,29 @@
+ import processing.sound.*;
+
+SinOsc[] voces; 
+float[] frecuencias = {261.63, 329.63, 392.00}; // do, mi, sol
+
+void  setup() { 
+  size(400, 400); 
+  voces = new SinOsc[frecuencias.length]; 
+  for (int i = 0; i < frecuencias.length; i++) { 
+    voces[i] = new SinOsc(this); 
+    voces[i].freq(frecuencias[i]); 
+    voces[i].amp(0.1); 
+    voces[i].play(); // las tres suenan a la vez: el acorde 
+  }
+} 
+
+void draw() {
+  background(255);
+  noFill();
+  for (int i = 0; i < voces.length; i++) {
+    stroke(0, 90);
+    beginShape();
+    for (int x = 0; x <= width; x++) {
+      float t = map(x, 0, width, 0, TWO_PI * (i + 1));
+      vertex(x, 200 + 60 * sin(t));
+    }
+    endShape();
+  }
+}

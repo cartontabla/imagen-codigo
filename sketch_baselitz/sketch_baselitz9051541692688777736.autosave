@@ -1,0 +1,30 @@
+// sketch_baselitz
+// El error solicitado: la misma inversión que producía el fallo, escrita
+// ahora a propósito. Baselitz no se equivocó: decidió.
+
+PImage  retrato, salida;
+boolean invertir = true;    // <- la única diferencia con el error
+
+void setup() {
+  size(800, 800);
+  pixelDensity(1);
+  noLoop();
+
+  retrato = loadImage("retrato.jpg");
+  retrato.resize(width, height);
+  retrato.loadPixels();
+
+  salida = createImage(width, height, RGB);
+  salida.loadPixels();
+  for (int y = height; y > 0; y--) {
+    for (int x = 0; x < width; x++) {
+      salida.pixels[y * width + x] = retrato.pixels[fila * width + x];
+    }
+  }
+  salida.updatePixels();
+}
+
+void draw() {
+  image(salida, 0, 0);
+  save("baselitz.png");
+}
